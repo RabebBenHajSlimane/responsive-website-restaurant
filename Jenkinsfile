@@ -11,7 +11,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Utilisez ce dépôt local, ou configurez pour cloner depuis GitHub
-                dir('/home/rabeb/Desktop/responsive-website-restaurant') {
+                dir('/var/jenkins_home/temp_clone/responsive-website-restaurant') {
                      git 'https://github.com/RabebBenHajSlimane/responsive-website-restaurant.git'
                 }
             }
