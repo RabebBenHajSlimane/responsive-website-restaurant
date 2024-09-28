@@ -10,7 +10,10 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scm // Utilise la configuration SCM du job
+                // Utilisez ce dépôt local, ou configurez pour cloner depuis GitHub
+                dir('/var/jenkins_home/temp_clone/responsive-website-restaurant') {
+                     git 'https://github.com/RabebBenHajSlimane/responsive-website-restaurant.git'
+                }
             }
         }
         stage('Build Docker Image') {
