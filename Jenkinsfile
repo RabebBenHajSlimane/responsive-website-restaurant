@@ -1,45 +1,43 @@
 pipeline {
-    agent any
-
-    environment {
-        REGISTRY = "141119988/responsive-website-restaurant" // Remplacez par votre nom d'utilisateur Docker Hub
-        REGISTRY_CREDENTIALS = 'dockerhub-credentials-id' // Remplacez par l'ID des credentials Docker Hub dans Jenkins
-        KUBECONFIG_CREDENTIALS = 'kubeconfig-credentials-id' // Remplacez par l'ID des credentials kubeconfig
-    }
-
+    agent none  // Aucune machine par défaut, car on spécifie un agent externe
     stages {
-        stage('Checkout') {
+        stage('Clone Repository') {
+            agent { label 'Ubuntu-VM-Agent' } // Remplacez 'your-agent-label' par le nom de votre agent Jenkins configuré sur la VM Ubuntu
             steps {
-                // Utilisez ce dépôt local, ou configurez pour cloner depuis GitHub
-                dir('/var/jenkins_home/temp_clone/responsive-website-restaurant') {
-                     git 'https://github.com/RabebBenHajSlimane/responsive-website-restaurant.git'
+                script {
+                    // Clone le dépôt GitHub
+                    git 'https://github.com/RabebBenHajSlimane/responsive-website-restaurant.git'  // Remplacez par l'URL de votre dépôt GitHub
                 }
             }
         }
         stage('Build Docker Image') {
+            agent { label ' Ubuntu-VM-Agent'}
             steps {
                 script {
-                    dockerImage = docker.build("${REGISTRY}:${env.BUILD_ID}")
+                    // Construire l'image Docker à partir du Dockerfile
+                    sh 'docker build -t 141119988/my-image:latest .' // Assurez-vous que le chemin est correct
                 }
             }
         }
         stage('Push Docker Image') {
+            agent { label 'Ubuntu-VM-Agent' }
             steps {
                 script {
-                    docker.withRegistry('', REGISTRY_CREDENTIALS) {
-                        dockerImage.push()
-                    }
+                    // (Optionnel) Se connecter à Docker Hub
+                    sh 'docker login -u 141119988 -p doudi1411 '
+                    
+                    // Pousser l'image Docker sur Docker Hub
+                    sh 'docker push 141119988/my-image:latest'
                 }
             }
         }
         stage('Deploy to Kubernetes') {
+            agent { label 'Ubuntu-VM-Agent' }
             steps {
                 script {
-                    withCredentials([file(credentialsId: KUBECONFIG_CREDENTIALS, variable: 'KUBECONFIG')]) {
-                        sh '''
-                        kubectl --kubeconfig=$KUBECONFIG apply -f k8s/deployment.yaml
-                        '''
-                    }
+                    // Déployer l'application sur Kubernetes
+                    // Assurez-vous que votre fichier de configuration Kubernetes est prêt (par exemple, deployment.yaml)
+                    sh 'kubectl apply -f my-app-deployment.yaml'  // Remplacez par le chemin vers votre fichier de configuration si nécessaire
                 }
             }
         }
