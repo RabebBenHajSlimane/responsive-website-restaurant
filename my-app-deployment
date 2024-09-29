@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-deployment  # Nom du déploiement
+  labels:
+    app: my-web-app  # Étiquette pour identifier l'application
+spec:
+  replicas: 1  # Nombre de réplicas de votre application
+  selector:
+    matchLabels:
+      app: my-web-app
+  template:
+    metadata:
+      labels:
+        app: my-web-app  # Les étiquettes pour les pods
+    spec:
+      containers:
+        - name: my-web-app-container  # Nom du conteneur
+          image: 141119988/my-image:latest  # Remplacez par l'image Docker de votre application
+          ports:
+            - containerPort: 80  # Port sur lequel Nginx écoute
