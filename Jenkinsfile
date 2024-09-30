@@ -2,24 +2,24 @@ pipeline {
     agent none  // Aucune machine par défaut, car on spécifie un agent externe
     stages {
         stage('Clone Repository') {
-            agent { label 'Ubuntu-VM-Agent' } // Remplacez par le nom de votre agent Jenkins configuré sur la VM Ubuntu
+            agent { label 'Ubuntu-VM-Agent' }
             steps {
                 script {
                     // S'assurer que l'installation Git est utilisée
                     tools {
-                        git 'Default' // Utiliser l'installation Git configurée
+                        git 'Default' 
                     }
                     // Clone le dépôt GitHub
-                    git 'https://github.com/RabebBenHajSlimane/responsive-website-restaurant.git'  // Remplacez par l'URL de votre dépôt GitHub
+                    git 'https://github.com/RabebBenHajSlimane/responsive-website-restaurant.git'
                 }
             }
         }
         stage('Build Docker Image') {
-            agent { label 'Ubuntu-VM-Agent'}
+            agent { label 'Ubuntu-VM-Agent' }
             steps {
                 script {
                     // Construire l'image Docker à partir du Dockerfile
-                    sh 'docker build -t 141119988/my-image:latest .' // Assurez-vous que le chemin est correct
+                    sh 'docker build -t 141119988/my-image:latest .' 
                 }
             }
         }
@@ -27,11 +27,14 @@ pipeline {
             agent { label 'Ubuntu-VM-Agent' }
             steps {
                 script {
-                    // (Optionnel) Se connecter à Docker Hub
-                    sh 'docker login -u 141119988 -p doudi1411 '
-                    
-                    // Pousser l'image Docker sur Docker Hub
-                    sh 'docker push 141119988/my-image:latest'
+                    // Utiliser les informations d'identification Jenkins pour Docker Hub
+                    withCredentials([usernamePassword(credentialsId: 'docker-credentials-id', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        // Se connecter à Docker Hub
+                        sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
+                        
+                        // Pousser l'image Docker sur Docker Hub
+                        sh 'docker push 141119988/my-image:latest'
+                    }
                 }
             }
         }
@@ -40,10 +43,19 @@ pipeline {
             steps {
                 script {
                     // Déployer l'application sur Kubernetes
-                    // Assurez-vous que votre fichier de configuration Kubernetes est prêt (par exemple, deployment.yaml)
-                    sh 'kubectl apply -f my-app-deployment.yaml'  // Remplacez par le chemin vers votre fichier de configuration si nécessaire
+                    sh 'kubectl apply -f my-app-deployment.yaml'  
                 }
             }
+        }
+    }
+    post {
+        success {
+            // Notifications en cas de succès
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            // Notifications en cas d'échec
+            echo 'Pipeline failed!'
         }
     }
 }
