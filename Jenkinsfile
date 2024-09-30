@@ -5,11 +5,11 @@ pipeline {
             agent { label 'Ubuntu-VM-Agent' }
             steps {
                 script {
-                    // S'assurer que l'installation Git est utilisée
-                    // L'outil Git n'est pas nécessaire ici car l'étape de clonage l'utilise directement.
-                    
-                    // Clone le dépôt GitHub
-                    git 'https://github.com/RabebBenHajSlimane/responsive-website-restaurant.git'
+                    // Utiliser les informations d'identification pour cloner le dépôt privé
+                    withCredentials([usernamePassword(credentialsId: 'github-credentials-id', passwordVariable: 'GITHUB_TOKEN', usernameVariable: 'GITHUB_USERNAME')]) {
+                        // Cloner le dépôt GitHub
+                        sh 'git clone https://$GITHUB_USERNAME:$GITHUB_TOKEN@github.com/RabebBenHajSlimane/responsive-website-restaurant.git'
+                    }
                 }
             }
         }
@@ -29,7 +29,7 @@ pipeline {
                     // Utiliser les informations d'identification Jenkins pour Docker Hub
                     withCredentials([usernamePassword(credentialsId: 'docker-credentials-id', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                         // Se connecter à Docker Hub
-                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                        sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
                         
                         // Pousser l'image Docker sur Docker Hub
                         sh 'docker push 141119988/my-image:latest'
