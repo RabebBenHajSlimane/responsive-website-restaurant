@@ -6,9 +6,8 @@ pipeline {
             steps {
                 script {
                     // S'assurer que l'installation Git est utilisée
-                    tools {
-                        git 'Default' 
-                    }
+                    // L'outil Git n'est pas nécessaire ici car l'étape de clonage l'utilise directement.
+                    
                     // Clone le dépôt GitHub
                     git 'https://github.com/RabebBenHajSlimane/responsive-website-restaurant.git'
                 }
@@ -30,7 +29,7 @@ pipeline {
                     // Utiliser les informations d'identification Jenkins pour Docker Hub
                     withCredentials([usernamePassword(credentialsId: 'docker-credentials-id', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                         // Se connecter à Docker Hub
-                        sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
+                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
                         
                         // Pousser l'image Docker sur Docker Hub
                         sh 'docker push 141119988/my-image:latest'
